@@ -56,15 +56,18 @@ app.get('/health', (_req, res) => {
   });
 });
 // app.use(corsTestRoutes);
+
+
 app.use(verifyToken);
 app.use('/api/v1/identificacion-tipo', identificaciontipoRoutes);
 app.use('/api/v1/empresa', empresaRoutes);
 app.use('/api/v1/cliente', clienteRoutes);
-app.use('/api/v1/producto', productoRoutes);
-app.use('/api/v1/factura', facturaRoutes);
 app.use('/api/v1/factura-detalle', facturaDetalleRoutes);
-app.use('/api/v1/factura-pdf',facturaPDFRoutes);
 app.use('/api/v1/invetario',invetarioRoutes);
+app.use('/api/v1/factura-pdf',facturaPDFRoutes);
+app.use('/api/v1/factura', facturaRoutes);
+app.use('/api/v1/producto', productoRoutes);
+
 
 app.use(corsErrorHandler);
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

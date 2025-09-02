@@ -34,16 +34,16 @@ router.post('/', async (req, res) => {
     await doc.save();
     res.status(201).json(doc);
   } catch (err) {
-    res.status(500).json({ message: err || 'Server error' });
+    res.json({ message: err });
   }
 });
 
 router.get('/', async (_req, res) => {
   try {
-    const docs = await Producto.find();
+    const docs = await Producto.find().populate('inventarios');
     res.json(docs);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: err});
   }
 });
 
