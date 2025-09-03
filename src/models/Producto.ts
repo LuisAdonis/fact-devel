@@ -9,7 +9,7 @@ export interface IProducto extends Document {
   presentacion?: string;
   laboratorio?: string;
   categoria?: string;
-  estado?: string;
+  estado?: boolean;
   controlado?: string;
   codigo_barra?: string;
   registro_sanitario?: string;
@@ -37,7 +37,7 @@ const schema = new Schema<IProducto>({
   presentacion: { type: String },
   laboratorio: { type: String },
   categoria: { type: String },
-  estado: { type: String },
+  estado: { type: Boolean },
   controlado: { type: String },
   codigo_barra: { type: String },
   registro_sanitario: { type: String },
