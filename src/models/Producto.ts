@@ -15,7 +15,6 @@ export interface IProducto extends Document {
   registro_sanitario?: string;
   ubicacion?: string;
   tipo_medicamento: string;
-
   precio_unitario: number;
   precio_caja: number;
   tiene_iva: boolean;

@@ -63,10 +63,10 @@ app.use('/api/v1/identificacion-tipo', identificaciontipoRoutes);
 app.use('/api/v1/empresa', empresaRoutes);
 app.use('/api/v1/cliente', clienteRoutes);
 app.use('/api/v1/factura-detalle', facturaDetalleRoutes);
-app.use('/api/v1/invetario',invetarioRoutes);
 app.use('/api/v1/factura-pdf',facturaPDFRoutes);
 app.use('/api/v1/factura', facturaRoutes);
 app.use('/api/v1/producto', productoRoutes);
+app.use('/api/v1/invetario',invetarioRoutes);
 
 
 app.use(corsErrorHandler);
