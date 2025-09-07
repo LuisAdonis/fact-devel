@@ -230,6 +230,7 @@ export class FacturaService {
     });
 
     const totalSinImpuestos = parseFloat(datosFactura.infoFactura.totalSinImpuestos);
+    const totalExentoipuesto = parseFloat(datosFactura.infoFactura.importeExentoIva);
     const totalIva = datosFactura.detalles.reduce(
       (s: number, d: any) => s + parseFloat(d.detalle.impuestos[0].impuesto.valor),
       0,
@@ -339,6 +340,9 @@ export class FacturaService {
               await this.generarPDFFactura(factura, empresa, cliente, productos, datosFactura);
             } else {
               console.log(`⚠️ SRI Estado: ${respuestaSRI.estado} - Factura ID: ${factura._id}`);
+              // console.log(` ${factura}`)
+              await this.generarPDFFactura(factura, empresa, cliente, productos, datosFactura);
+
             }
           }
         } catch (error: any) {

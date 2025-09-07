@@ -265,12 +265,12 @@ function generateInvoiceHTML(data: FacturaData): string {
         <div class="totals-section">
           <table class="totals-table">
             <tr>
-              <td class="label">SUBTOTAL 12%</td>
-              <td class="amount">$${parseFloat(factura.infoFactura.totalSinImpuestos).toFixed(2)}</td>
+              <td class="label">SUBTOTAL 15%</td>
+              <td class="amount">$${(parseFloat(factura.infoFactura.totalSinImpuestos)-parseFloat(factura.infoFactura.importeExentoIva)).toFixed(2)}</td>
             </tr>
             <tr>
               <td class="label">SUBTOTAL EXENTO IVA</td>
-              <td class="amount">$0.00</td>
+              <td class="amount">$${parseFloat(factura.infoFactura.importeExentoIva).toFixed(2)}</td>
             </tr>
             <tr>
               <td class="label">SUBTOTAL SIN IMPUESTOS</td>

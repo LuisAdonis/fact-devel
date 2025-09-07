@@ -24,6 +24,7 @@ export interface InvoiceInfo {
   razonSocialComprador: string;
   totalSinImpuestos: string;
   importeTotal: string;
+  importeExentoIva:string,
 }
 
 export interface TaxInfo {
