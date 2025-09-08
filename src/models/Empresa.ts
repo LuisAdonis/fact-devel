@@ -14,7 +14,8 @@ export interface IEmpresa extends Document {
   tipo_ambiente: number;
   tipo_emision: number;
   obligado_contabilidad?: boolean;
-  contribuyente_especial?: string;
+  contribuyente_especial?: boolean;
+  agente_de_retencion?:boolean;
   email_notificacion?: string;
   certificate?: string;
   certificate_password?: string;
@@ -37,7 +38,8 @@ const schema = new Schema<IEmpresa>(
     tipo_ambiente: { type: Number, required: true, default: 1 }, // 1 = Pruebas, 2 = Producción
     tipo_emision: { type: Number, required: true, default: 1 }, // 1 = Normal
     obligado_contabilidad: { type: Boolean, default: false },
-    contribuyente_especial: { type: String },
+    agente_de_retencion: { type: Boolean, default: false },
+    contribuyente_especial: {  type: Boolean, default: false  },
     email_notificacion: { type: String },
     certificate: { type: String },
     certificate_password: { type: String },

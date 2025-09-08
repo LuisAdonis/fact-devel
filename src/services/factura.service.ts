@@ -23,7 +23,7 @@ import { promisify } from 'util';
 const execPromise = promisify(exec);
 
 export class FacturaService {
-    static validarDatosFactura(invoiceData: InvoiceRequest): boolean {
+  static validarDatosFactura(invoiceData: InvoiceRequest): boolean {
     return !!(invoiceData.infoTributaria && invoiceData.infoFactura && invoiceData.detalles);
   }
   static async generarSecuencial(rucCompany: string): Promise<string> {
@@ -43,12 +43,12 @@ export class FacturaService {
     }
     return secuencial;
   }
-    static async buscarTipoIdentificacion(codigo: string): Promise<IIdentificacionTipo | null> {
+  static async buscarTipoIdentificacion(codigo: string): Promise<IIdentificacionTipo | null> {
     const tipoIdent = await IdentificacionTipo.findOne({ codigo });
     return tipoIdent;
   }
 
-    static async buscarEmpresa(
+  static async buscarEmpresa(
     ruc: string,
   ): Promise<(IEmpresa & { certificatePath?: string; certificatePassword?: string }) | null> {
     const empresa = await Empresa.findOne({ ruc });
@@ -100,7 +100,7 @@ export class FacturaService {
         } catch (error) {
           throw new Error(
             'Error al procesar el certificado PKCS#12: ' +
-              (error instanceof Error ? error.message : 'Error desconocido'),
+            (error instanceof Error ? error.message : 'Error desconocido'),
           );
         }
 
@@ -122,7 +122,7 @@ export class FacturaService {
     const cliente = await Cliente.findOne({ identificacion });
     return cliente;
   }
-  static async buscarProducto(codigo: string): Promise<IProducto| null> {
+  static async buscarProducto(codigo: string): Promise<IProducto | null> {
     const producto = await Producto.findOne({ codigo });
     return producto;
   }
@@ -153,8 +153,8 @@ export class FacturaService {
 
     await factura.save();
     return factura;
-  } 
-  
+  }
+
   static async crearDetallesInvoice(facturaId: string | any, detalles: ProductDetail[], products: IProducto[]) {
     const detallesGuardados = [];
 
@@ -178,7 +178,7 @@ export class FacturaService {
     return detallesGuardados;
   }
 
-    static async procesarFacturaCompleta(datosFactura: InvoiceRequest) {
+  static async procesarFacturaCompleta(datosFactura: InvoiceRequest) {
     if (!this.validarDatosFactura(datosFactura)) {
       throw new Error('Datos de factura inválidos o incompletos');
     }
@@ -214,7 +214,7 @@ export class FacturaService {
       fechaEmision,
     };
   }
-    static async crearFacturaCompleta(datosFactura: InvoiceRequest) {
+  static async crearFacturaCompleta(datosFactura: InvoiceRequest) {
     const { empresa, cliente, productos, secuencial, fechaEmision } = await this.procesarFacturaCompleta(datosFactura);
 
     const serie = `${empresa.codigo_establecimiento}${empresa.punto_emision}`;
@@ -230,7 +230,6 @@ export class FacturaService {
     });
 
     const totalSinImpuestos = parseFloat(datosFactura.infoFactura.totalSinImpuestos);
-    const totalExentoipuesto = parseFloat(datosFactura.infoFactura.importeExentoIva);
     const totalIva = datosFactura.detalles.reduce(
       (s: number, d: any) => s + parseFloat(d.detalle.impuestos[0].impuesto.valor),
       0,
@@ -340,9 +339,6 @@ export class FacturaService {
               await this.generarPDFFactura(factura, empresa, cliente, productos, datosFactura);
             } else {
               console.log(`⚠️ SRI Estado: ${respuestaSRI.estado} - Factura ID: ${factura._id}`);
-              // console.log(` ${factura}`)
-              await this.generarPDFFactura(factura, empresa, cliente, productos, datosFactura);
-
             }
           }
         } catch (error: any) {
@@ -663,6 +659,77 @@ export class FacturaService {
       return diagnosis;
     } catch (error: any) {
       return { ...diagnosis, error: `Error general: ${error.message}` };
+    }
+  }
+
+
+
+
+  static async procesarRegeneracionPDF(factura: any){
+    try {
+      const empresa = await Empresa.findById(factura.empresa_emisora_id)
+        .lean()
+        .exec();
+      if (!empresa) throw new Error("Empresa no encontrada");
+      const cliente = await Cliente.findById(factura.cliente_id)
+        .lean()
+        .exec();
+      if (!cliente) throw new Error("Cliente no encontrado");
+      const productos: IProducto[] = [];
+      if (factura.datos_originales) {
+        const parsed = JSON.parse(factura.datos_originales);
+        if (parsed.detalles) {
+          for (const item of parsed.detalles) {
+            const detalle = item.detalle || item;
+            productos.push({
+              codigo: detalle.codigoPrincipal,
+              descripcion: detalle.descripcion,
+              nombre: detalle.descripcion,           // usamos la descripción como nombre
+              tipo_medicamento: detalle.tipo_medicamento,              // valor por defecto
+              precio_unitario: parseFloat(detalle.precioUnitario),
+              precio_caja: 0,                        // valor por defecto si no hay info
+              tiene_iva: (detalle.impuestos || []).some(
+                (imp: any) => imp.impuesto.codigo === "2" || imp.impuesto.codigo === "4"
+              ),
+              imagen: "",                             // placeholder vacío
+              nombre_comercial: undefined,
+              presentacion: undefined,
+              laboratorio: undefined,
+              categoria: undefined,
+              estado: true,
+              controlado: undefined,
+              codigo_barra: undefined,
+              registro_sanitario: undefined,
+              ubicacion: undefined,
+              descripcion_adicional: undefined,
+            } as IProducto); // ya no debería dar error porque todos los campos obligatorios están presentes
+
+          }
+        }
+      }
+      const datosFactura: InvoiceRequest = {
+        infoTributaria: factura.datos_originales
+          ? JSON.parse(factura.datos_originales).infoTributaria
+          : {},
+        infoFactura: factura.datos_originales
+          ? JSON.parse(factura.datos_originales).infoFactura
+          : {},
+        detalles: factura.datos_originales
+          ? JSON.parse(factura.datos_originales).detalles
+          : []
+      };
+      await this.generarPDFFactura(
+        factura,
+        empresa,
+        cliente,
+        productos,
+        datosFactura
+      );
+      console.log("Se genero el pdf");
+      return factura;
+    } catch (error) {
+      console.error("Error procesando regeneración PDF:", error);
+      throw error;
     }
   }
 

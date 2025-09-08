@@ -24,6 +24,7 @@ import corsErrorHandler from './middleware/corsErrorHandler';
 
 import path from 'path';
 
+import swaggerSpec from './swagger';
 
 dotenv.config();
 const app = express();
@@ -46,6 +47,32 @@ app.use(express.json());
 app.use(authRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/Empresa')));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/Productos')));
+
+const swaggerHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <title>API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.18.3/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@4.18.3/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = function() {
+      SwaggerUIBundle({ url: '/swagger.json', dom_id: '#swagger-ui' });
+    };
+  </script>
+</body>
+</html>`;
+
+// Public routes for documentation
+app.get('/swagger.json', (_req, res) => {
+  res.json(swaggerSpec);
+});
+
+app.get('/docs', (_req, res) => {
+  res.type('html').send(swaggerHtml);
+});
 
 app.get('/health', (_req, res) => {
   res.json({
@@ -86,7 +113,7 @@ mongoose
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`📄 API Docs: http://localhost:${PORT}/health`);
+      console.log(`📄 API Docs: http://localhost:${PORT}/docs`);
     });
   })
   .catch((err) => {
