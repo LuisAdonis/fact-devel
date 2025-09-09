@@ -6,15 +6,17 @@ router.post('/', async (req, res) => {
   try {
     const doc = new Cliente(req.body);
     await doc.save();
+    await doc.populate('identificacions');
+
     res.status(201).json(doc);
   } catch (err) {
-    res.status(500).json({ message:err || 'Server error'});
+    res.status(500).json({ message: err || 'Server error' });
   }
 });
 
 router.get('/', async (_req, res) => {
   try {
-    const docs = await Cliente.find();
+    const docs = await Cliente.find().populate('identificacions');
     res.json(docs);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -33,7 +35,7 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const doc = await Cliente.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const doc = await Cliente.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('identificacions');
     if (!doc) return res.status(404).json({ message: 'Not found' });
     res.json(doc);
   } catch (err) {

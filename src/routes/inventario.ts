@@ -1,4 +1,4 @@
-import { Router }    from 'express';
+import { Router } from 'express';
 import Inventario from '../models/Inventario';
 const router = Router();
 router.get('/', async (_req, res) => {
@@ -33,9 +33,73 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const doc = await Inventario.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!doc) return res.status(404).json({ message: 'Not found' });
-    res.json(doc);
+    // const doc = await Inventario.findOneAndUpdate({producto_id:req.params.id}, {stock_caja:1}, { new: true });
+    // if (!doc) return res.status(404).json({ message: 'Not found' });
+    // res.json(doc);
+
+    const productoId = req.params.id;
+    const cantidad = req.body.cantidad;
+    const tipo = req.body.tipov;  // 'unidad' o 'caja'
+
+    const inventarios = await Inventario.find({
+      producto_id: productoId,
+      $or: [{ stock_unidades: { $gt: 0 } }, { stock_caja: { $gt: 0 } }],
+    }).sort({ fechaIngreso: 1 });
+
+    if (inventarios.length === 0) {
+      return res.status(404).json({ message: 'No hay stock disponible' });
+    }
+
+    let restante = cantidad;
+
+    for (const inv of inventarios) {
+      if (restante <= 0) break;
+
+      const unidadesPorCaja = inv.unidades_caja;
+
+      if (tipo) {
+        if (inv.stock_caja >= restante) {
+          inv.stock_caja -= restante;
+          restante = 0;
+        } else {
+          restante -= inv.stock_caja;
+          inv.stock_caja = 0;
+        }
+      } else {
+        // DESCONTAR UNIDADES
+        if (inv.stock_unidades >= restante) {
+          inv.stock_unidades -= restante;
+          restante = 0;
+        } else {
+          restante -= inv.stock_unidades;
+          inv.stock_unidades = 0;
+
+          while (restante > 0 && inv.stock_caja > 0) {
+            inv.stock_caja -= 1;
+            inv.stock_unidades += unidadesPorCaja;
+
+            if (inv.stock_unidades >= restante) {
+              inv.stock_unidades -= restante;
+              restante = 0;
+            } else {
+              restante -= inv.stock_unidades;
+              inv.stock_unidades = 0;
+            }
+          }
+        }
+      }
+
+      await inv.save();
+    }
+
+    // Verificación final después de procesar todos los inventarios
+    if (restante > 0) {
+      return res.status(400).json({ message: 'No hay suficiente stock para completar la operación' });
+    }
+
+    res.json(inventarios);
+
+
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

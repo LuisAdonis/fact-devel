@@ -4,7 +4,6 @@ export interface IProducto extends Document {
   codigo: string;
   descripcion: string;
   nombre: string;
-
   nombre_comercial?: string;
   presentacion?: string;
   laboratorio?: string;

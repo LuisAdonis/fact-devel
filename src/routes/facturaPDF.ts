@@ -13,7 +13,7 @@ router.get('/', async (_req, res) => {
   }
 });
 
-router.get('/invoice/:facturaId', async (req, res) => {
+router.get('/factura/:facturaId', async (req, res) => {
   try {
     const doc = await FacturaPDF.findOne({ factura_id: req.params.facturaId });
     if (!doc) return res.status(404).json({ message: 'PDF not found' });
@@ -55,9 +55,16 @@ router.get('/regenerate/:facturaId', async (req, res) => {
   try {
       const docs = await Factura.findById(req.params.facturaId);
       console.log(".."+docs?.sri_estado);
-      const responses=await FacturaService.procesarRegeneracionPDF(docs);
+      const facturpdf=await FacturaPDF.findOne({factura_id:docs?.id});
+     if(facturpdf){
+       console.log(facturpdf?.factura_id);
+       const factura = await FacturaPDF.findOneAndDelete({factura_id:facturpdf.factura_id});
+       console.log(factura?.factura_id+": Eliminada");
 
-    res.json({ message: 'PDF regeneration requested', facturaId:req.params.facturaId});
+     }
+      const responses=await FacturaService.procesarRegeneracionPDF(docs);
+      console.log("c");
+    res.json({ message: 'PDF regeneration requested', facturaId:responses});
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

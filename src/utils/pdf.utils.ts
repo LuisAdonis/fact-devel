@@ -370,7 +370,11 @@ export async function savePDFToFile(pdfBuffer: Buffer, filename: string): Promis
   const os = require('os');
 
   const tempDir = os.tmpdir();
-  const filePath = path.join(tempDir, `${filename}.pdf`);
+    const downloadsDir = path.join(os.homedir(), 'Downloads');
+  const filePath = path.join(downloadsDir, `${filename}.pdf`);
+
+  // const filePath = path.join(tempDir, `${filename}.pdf`);
+  
 
   fs.writeFileSync(filePath, pdfBuffer);
 

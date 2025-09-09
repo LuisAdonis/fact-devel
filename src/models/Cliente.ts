@@ -16,5 +16,17 @@ const schema = new Schema<ICliente>({
   direccion: { type: String },
   email: { type: String },
   telefono: { type: String },
+},{
+  toJSON: { virtuals: true }, 
+  toObject: { virtuals: true }
+});
+
+schema.virtual('identificacions', {
+  ref: 'IdentificacionTipo',
+  localField: 'tipo_identificacion_id',
+  foreignField: '_id',
+  justOne: true
+
+  
 });
 export default model<ICliente>('Cliente', schema);
