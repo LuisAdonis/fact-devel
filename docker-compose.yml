@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       NODE_ENV: development
-      MONGODB_URI: "mongodb://root:facturacion@192.168.123.40:27017/f-devel?authSource=admin"
+      MONGODB_URI: "mongodb://root:facturacion@db:27017/f-devel?authSource=admin"
       SRI_ENVIRONMENT: 1  # 1=Pruebas, 2=Producción
       SRI_RECEPCION_URL_PRUEBAS: "https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl"
       SRI_RECEPCION_URL_PRODUCCION: "https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl"
