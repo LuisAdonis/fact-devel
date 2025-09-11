@@ -31,6 +31,15 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const doc = await Inventario.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!doc) return res.status(404).json({ message: 'Not found' });
+    res.json(doc);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 router.put('/update/:id', async (req, res) => {
   try {
     const productoId = req.params.id;
