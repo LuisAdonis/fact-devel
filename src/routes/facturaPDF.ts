@@ -53,18 +53,32 @@ router.get('/download/:claveAcceso', async (req, res) => {
 // Regenerate PDF for a specific invoice
 router.get('/regenerate/:facturaId', async (req, res) => {
   try {
-      const docs = await Factura.findById(req.params.facturaId);
-      console.log(".."+docs?.sri_estado);
-      const facturpdf=await FacturaPDF.findOne({factura_id:docs?.id});
-     if(facturpdf){
-       console.log(facturpdf?.factura_id);
-       const factura = await FacturaPDF.findOneAndDelete({factura_id:facturpdf.factura_id});
-       console.log(factura?.factura_id+": Eliminada");
+    const docs = await Factura.findById(req.params.facturaId);
+    console.log(".." + docs?.sri_estado);
+    const facturpdf = await FacturaPDF.findOne({ factura_id: docs?.id });
+    if (facturpdf) {
+      console.log(facturpdf?.factura_id);
+      const factura = await FacturaPDF.findOneAndDelete({ factura_id: facturpdf.factura_id });
+      console.log(factura?.factura_id + ": Eliminada");
 
-     }
-      const responses=await FacturaService.procesarRegeneracionPDF(docs);
-      console.log("c");
-    res.json({ message: 'PDF regeneration requested', facturaId:responses});
+    }
+    const responses = await FacturaService.procesarRegeneracionPDF(docs);
+    console.log(docs?.clave_acceso);
+
+    const doc = await FacturaPDF.findOne({ claveAcceso: docs?.clave_acceso });
+    if (!doc) return res.status(404).json({ message: 'PDF not found' });
+
+    if (doc.pdf_buffer) {
+      res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+        'Content-Disposition',
+        `inline; filename="factura_${doc.claveAcceso}.pdf"`
+      );
+      res.send(doc.pdf_buffer);
+    } else {
+      res.status(404).json({ message: 'PDF buffer not available' });
+    }
+
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

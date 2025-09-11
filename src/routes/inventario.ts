@@ -31,20 +31,23 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
   try {
-    // const doc = await Inventario.findOneAndUpdate({producto_id:req.params.id}, {stock_caja:1}, { new: true });
-    // if (!doc) return res.status(404).json({ message: 'Not found' });
-    // res.json(doc);
-
     const productoId = req.params.id;
     const cantidad = req.body.cantidad;
-    const tipo = req.body.tipov;  // 'unidad' o 'caja'
+    const tipo = req.body.tipov;
+    const ahora = new Date();
+
 
     const inventarios = await Inventario.find({
       producto_id: productoId,
-      $or: [{ stock_unidades: { $gt: 0 } }, { stock_caja: { $gt: 0 } }],
-    }).sort({ fechaIngreso: 1 });
+      fecha_caducidad: { $gte: ahora },
+      $or: [
+        { stock_unidades: { $gt: 0 } },
+        { stock_caja: { $gt: 0 } }
+      ],
+    }).sort({ fecha_caducidad: 1 });
+
 
     if (inventarios.length === 0) {
       return res.status(404).json({ message: 'No hay stock disponible' });
@@ -66,7 +69,6 @@ router.put('/:id', async (req, res) => {
           inv.stock_caja = 0;
         }
       } else {
-        // DESCONTAR UNIDADES
         if (inv.stock_unidades >= restante) {
           inv.stock_unidades -= restante;
           restante = 0;
@@ -92,14 +94,10 @@ router.put('/:id', async (req, res) => {
       await inv.save();
     }
 
-    // Verificación final después de procesar todos los inventarios
     if (restante > 0) {
       return res.status(400).json({ message: 'No hay suficiente stock para completar la operación' });
     }
-
     res.json(inventarios);
-
-
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

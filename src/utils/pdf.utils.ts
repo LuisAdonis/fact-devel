@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import { IEmpresa } from '../models/Empresa';
-import { ICliente} from '../models/Cliente';
+import { ICliente } from '../models/Cliente';
 import { IProducto } from '../models/Producto';
 import { InvoiceRequest } from '../interfaces/invoice.interface';
 
@@ -168,7 +168,8 @@ function generateInvoiceHTML(data: FacturaData): string {
             </div>
             <div><strong>Dirección Matriz:</strong> ${empresa.direccion_matriz}</div>
             <div><strong>Dirección Sucursal:</strong> ${empresa.direccion_establecimiento}</div>
-            <div><strong>Contribuyente Especial Nro:</strong> ${empresa.contribuyente_especial || 'N/A'}</div>
+            <div><strong>Contribuyente Especial:</strong> ${empresa.contribuyente_especial ? 'SI' : 'NO'}</div>
+            <div><strong>Agente de retención:</strong> ${empresa.agente_de_retencion ? 'SI' : 'NO'}</div>
             <div><strong>OBLIGADO A LLEVAR CONTABILIDAD:</strong> ${empresa.obligado_contabilidad ? 'SI' : 'NO'}</div>
           </div>
           
@@ -232,10 +233,10 @@ function generateInvoiceHTML(data: FacturaData): string {
           </thead>
           <tbody>
             ${factura.detalles
-              .map((item: any, index: number) => {
-                const det = item.detalle;
-                const producto = productos[index];
-                return `
+      .map((item: any, index: number) => {
+        const det = item.detalle;
+        const producto = productos[index];
+        return `
                 <tr>
                   <td>${det.cantidad}</td>
                   <td>Und</td>
@@ -246,8 +247,8 @@ function generateInvoiceHTML(data: FacturaData): string {
                   <td class="text-right">$${parseFloat(det.precioTotalSinImpuesto).toFixed(2)}</td>
                 </tr>
               `;
-              })
-              .join('')}
+      })
+      .join('')}
           </tbody>
         </table>
 
@@ -266,11 +267,19 @@ function generateInvoiceHTML(data: FacturaData): string {
           <table class="totals-table">
             <tr>
               <td class="label">SUBTOTAL 15%</td>
-              <td class="amount">$${(parseFloat(factura.infoFactura.totalSinImpuestos)-parseFloat(factura.infoFactura.importeExentoIva)).toFixed(2)}</td>
+              <td class="amount">$${(parseFloat(factura.infoFactura.totalSinImpuestos) - parseFloat(factura.infoFactura.importeIvao)).toFixed(2)}</td>
+            </tr>
+             <tr>
+              <td class="label">SUBTOTAL 0%</td>
+              <td class="amount">$${parseFloat(factura.infoFactura.importeIvao).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td class="label">SUBTOTAL NO OBJETO DE IVA</td>
+              <td class="amount">$0.00</td>
             </tr>
             <tr>
               <td class="label">SUBTOTAL EXENTO IVA</td>
-              <td class="amount">$${parseFloat(factura.infoFactura.importeExentoIva).toFixed(2)}</td>
+              <td class="amount">$0.00</td>
             </tr>
             <tr>
               <td class="label">SUBTOTAL SIN IMPUESTOS</td>
@@ -285,8 +294,12 @@ function generateInvoiceHTML(data: FacturaData): string {
               <td class="amount">$0.00</td>
             </tr>
             <tr>
-              <td class="label">IVA 12%</td>
+              <td class="label">IVA 15%</td>
               <td class="amount">$${(parseFloat(factura.infoFactura.importeTotal) - parseFloat(factura.infoFactura.totalSinImpuestos)).toFixed(2)}</td>
+            </tr>
+              <tr>
+              <td class="label">TOTAL DEVOLUCION IVA</td>
+              <td class="amount">$0.00</td>
             </tr>
             <tr>
               <td class="label">IRBPNR</td>
@@ -303,6 +316,18 @@ function generateInvoiceHTML(data: FacturaData): string {
           </tbody>
         </table>
 
+      <div style="margin-top: 10px; font-size: 8px;">
+        <table  class="totals-table">
+               <tr>
+                <td class="label">VALOR TOTAL SIN SUBSIDIO</td>
+                <td class="amount">$0.00</td>
+              </tr>
+               <tr>
+                <td class="label">AHORRO POR SUBSIDIO</td>
+                <td class="amount">$0.00</td>
+              </tr>
+        </table>
+ </div>
         <!-- Additional Information -->
         <div style="margin-top: 15px; font-size: 8px;">
           <div><strong>Información Adicional:</strong></div>
@@ -370,11 +395,11 @@ export async function savePDFToFile(pdfBuffer: Buffer, filename: string): Promis
   const os = require('os');
 
   const tempDir = os.tmpdir();
-    const downloadsDir = path.join(os.homedir(), 'Downloads');
+  const downloadsDir = path.join(os.homedir(), 'Downloads');
   const filePath = path.join(downloadsDir, `${filename}.pdf`);
 
   // const filePath = path.join(tempDir, `${filename}.pdf`);
-  
+
 
   fs.writeFileSync(filePath, pdfBuffer);
 
