@@ -18,6 +18,10 @@ import facturaDetalleRoutes from './routes/facturaDetalle';
 import facturaPDFRoutes from './routes/facturaPDF';
 import invetarioRoutes from './routes/inventario';
 
+import CajaRouter from './routes/caja';
+import FacturaPagoRouter from './routes/facturaPago';
+import MovimientoCajaRouter from './routes/movimientoCaja';
+import UsuariosRouter from './routes/usuario';
 
 import verifyToken from './middleware/verifyToken';
 import corsErrorHandler from './middleware/corsErrorHandler';
@@ -65,21 +69,21 @@ const swaggerHtml = `<!DOCTYPE html>
 </body>
 </html>`;
 
-// Public routes for documentation
-app.get('/swagger.json', (_req, res) => {
-  res.json(swaggerSpec);
-});
+// app.get('/swagger.json', (_req, res) => {
+//   res.json(swaggerSpec);
+// });
 
-app.get('/docs', (_req, res) => {
-  res.type('html').send(swaggerHtml);
-});
+// app.get('/docs', (_req, res) => {
+//   res.type('html').send(swaggerHtml);
+// });
 
 app.get('/health', (_req, res) => {
   res.json({
     status: 'OK',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toUTCString(),
     cors: 'enabled',
     environment: process.env.NODE_ENV || 'development',
+    SRI_ENVIRONMENT: process.env.SRI_ENVIRONMENT || 'development',
   });
 });
 // app.use(corsTestRoutes);
@@ -95,6 +99,11 @@ app.use('/api/v1/factura-pdf',facturaPDFRoutes);
 
 app.use('/api/v1/producto', productoRoutes);
 app.use('/api/v1/invetario',invetarioRoutes);
+
+app.use('/api/v1/caja', CajaRouter);
+app.use('/api/v1/factura-pago', FacturaPagoRouter);
+app.use('/api/v1/movimiento-caja', MovimientoCajaRouter);
+app.use('/api/v1/usuarios', UsuariosRouter);
 
 
 app.use(corsErrorHandler);

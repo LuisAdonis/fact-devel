@@ -19,7 +19,6 @@ export interface IEmpresa extends Document {
   email_notificacion?: string;
   certificate?: string;
   certificate_password?: string;
-  user_id: Types.ObjectId; // Reference to User
 }
 
 const schema = new Schema<IEmpresa>(
@@ -43,7 +42,6 @@ const schema = new Schema<IEmpresa>(
     email_notificacion: { type: String },
     certificate: { type: String },
     certificate_password: { type: String },
-    user_id: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   },
   {
     timestamps: true, // Add createdAt and updatedAt

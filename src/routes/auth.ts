@@ -7,59 +7,60 @@ import { encrypt } from '../utils/encryption.utils';
 const router = Router();
 
 function isValidRUC(ruc: string): boolean {
-    const rucRegex = /^\d{10}001$/;
-    return rucRegex.test(ruc);
+  const rucRegex = /^\d{10}001$/;
+  return rucRegex.test(ruc);
 }
 
 async function isFirstRegistration(): Promise<boolean> {
-    const userCount = await Usuario.countDocuments();
-    const companyCount = await Empresa.countDocuments();
-    return userCount === 0 && companyCount === 0;
+  const userCount = await Usuario.countDocuments();
+  const companyCount = await Empresa.countDocuments();
+  return userCount === 0 && companyCount === 0;
 }
 
 async function validateRegistrationSecurity(req: any): Promise<{ valid: boolean; error?: string }> {
-    const { masterKey, invitationCode, ruc } = req.body;
+  const { masterKey, invitationCode, ruc } = req.body;
 
-    const isFirst = await isFirstRegistration();
+  const isFirst = await isFirstRegistration();
 
-    if (isFirst) {
-        const requiredMasterKey = process.env.MASTER_REGISTRATION_KEY;
-        if (!requiredMasterKey) {
-            return { valid: false, error: 'Sistema no configurado para registro inicial' };
-        }
-        if (masterKey !== requiredMasterKey) {
-            return { valid: false, error: 'Clave maestra requerida para el primer registro' };
-        }
-    } else {
-        const allowedRUCs = process.env.ALLOWED_RUCS?.split(',').map((r) => r.trim()) || [];
-        const validInvitationCodes = process.env.INVITATION_CODES?.split(',').map((c) => c.trim()) || [];
+  if (isFirst) {
+    const requiredMasterKey = process.env.MASTER_REGISTRATION_KEY;
+    if (!requiredMasterKey) {
+      return { valid: false, error: 'Sistema no configurado para registro inicial' };
+    }
+    if (masterKey !== requiredMasterKey) {
+      return { valid: false, error: 'Clave maestra requerida para el primer registro' };
+    }
+  } else {
+    const allowedRUCs = process.env.ALLOWED_RUCS?.split(',').map((r) => r.trim()) || [];
+    const validInvitationCodes = process.env.INVITATION_CODES?.split(',').map((c) => c.trim()) || [];
 
-        if (process.env.DISABLE_REGISTRATION === 'true') {
-            return { valid: false, error: 'Registro deshabilitado por el administrador' };
-        }
-
-        if (invitationCode && validInvitationCodes.includes(invitationCode)) {
-            return { valid: true };
-        }
-
-        if (ruc && allowedRUCs.includes(ruc)) {
-            return { valid: true };
-        }
-
-        if (!invitationCode && allowedRUCs.length === 0) {
-            return { valid: false, error: 'Código de invitación requerido' };
-        }
-
-        return { valid: false, error: 'Código de invitación inválido o RUC no autorizado' };
+    if (process.env.DISABLE_REGISTRATION === 'true') {
+      return { valid: false, error: 'Registro deshabilitado por el administrador' };
     }
 
-    return { valid: true };
+    if (invitationCode && validInvitationCodes.includes(invitationCode)) {
+      return { valid: true };
+    }
+
+    if (ruc && allowedRUCs.includes(ruc)) {
+      return { valid: true };
+    }
+
+    if (!invitationCode && allowedRUCs.length === 0) {
+      return { valid: false, error: 'Código de invitación requerido' };
+    }
+
+    return { valid: false, error: 'Código de invitación inválido o RUC no autorizado' };
+  }
+
+  return { valid: true };
 }
 
 
 router.post('/register', async (req, res) => {
   const {
     correo,
+    nombre,
     contrasena,
     // Company data
     ruc,
@@ -123,10 +124,7 @@ router.post('/register', async (req, res) => {
     // Encrypt certificate password
     const encryptedPass = certificatePassword ? encrypt(certificatePassword) : undefined;
 
-    // Create user
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
-    const user = new Usuario({ correo, contrasena: hashedPassword });
-    await user.save();
+
 
     // Create company
     const company = new Empresa({
@@ -142,10 +140,14 @@ router.post('/register', async (req, res) => {
       tipo_emision: tipo_emision || 1, // Default to normal emission
       certificate: certBase64,
       certificate_password: encryptedPass,
-      user_id: user._id, // Link company to user
     });
     await company.save();
+    // Create user
 
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+    console.log(company._id+"-------------")
+    const user = new Usuario({ nombre: nombre, correo: correo, contrasena: hashedPassword, administrador: true, empresa_id:company._id});
+    await user.save();
     // Generate token
     const token = jwt.sign({ userId: user._id, companyId: company._id }, process.env.JWT_SECRET || '', {
       expiresIn: '4d',
@@ -189,7 +191,7 @@ router.post('/auth', async (req, res) => {
     }
 
     // Find associated company
-    const company = await Empresa.findOne({ user_id: user._id });
+    const company = await Empresa.findOne({ _id: user.empresa_id });
 
     const token = jwt.sign(
       {
@@ -207,14 +209,17 @@ router.post('/auth', async (req, res) => {
       user: {
         id: user._id,
         email: user.correo,
+        nombre:user.nombre,
+        admnistrdor: user.administrador,
+
       },
       company: company
         ? {
-            id: company._id,
-            ruc: company.ruc,
-            razon_social: company.razon_social,
-            nombre_comercial: company.nombre_comercial,
-          }
+          id: company._id,
+          ruc: company.ruc,
+          razon_social: company.razon_social,
+          nombre_comercial: company.nombre_comercial,
+        }
         : null,
     });
   } catch (err) {
