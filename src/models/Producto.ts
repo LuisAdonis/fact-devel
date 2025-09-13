@@ -1,6 +1,7 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IProducto extends Document {
+  usuario_id: Types.ObjectId;        // Cajero que abre/cierra
   codigo: string;
   descripcion: string;
   nombre: string;
@@ -22,6 +23,7 @@ export interface IProducto extends Document {
 }
 
 const schema = new Schema<IProducto>({
+  usuario_id: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   codigo: { type: String, required: true },
   descripcion: { type: String, required: true },
   nombre: { type: String, required: true },
@@ -30,7 +32,6 @@ const schema = new Schema<IProducto>({
   tiene_iva: { type: Boolean, required: true },
   imagen: { type: String },
   descripcion_adicional: { type: String },
-
   nombre_comercial: { type: String },
   presentacion: { type: String },
   laboratorio: { type: String },

@@ -34,6 +34,7 @@ export interface TaxInfo {
 }
 
 export interface InvoiceRequest {
+  usuario_id:string;
   infoTributaria: TaxInfo;
   infoFactura: InvoiceInfo;
   detalles: ProductDetail[];
@@ -41,6 +42,7 @@ export interface InvoiceRequest {
 
 export interface CreateInvoiceDTO {
   empresaId: string | any;
+  usuarioId: string | any;
   clienteId: string | any;
   fechaEmision: Date;
   claveAcceso: string;

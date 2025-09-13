@@ -1,6 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IFactura extends Document {
+  usuario_id: Types.ObjectId;        // Cajero que abre/cierra
   empresa_emisora_id: Types.ObjectId;
   cliente_id: Types.ObjectId;
   fecha_emision: Date;
@@ -25,6 +26,7 @@ export interface IFactura extends Document {
 const schema = new Schema<IFactura>({
   empresa_emisora_id: { type: Schema.Types.ObjectId, ref: 'Empresa', required: true },
   cliente_id: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
+  usuario_id: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fecha_emision: { type: Date, required: true },
   clave_acceso: { type: String, required: true },
   secuencial: { type: String, required: true },

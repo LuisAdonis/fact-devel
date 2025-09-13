@@ -1,9 +1,9 @@
 {
-  "name": "factr-devel",
+  "name": "fact-devel",
   "version": "1.0.0",
-  "description": "F-SRI",
+  "description": "SRI",
   "license": "MIT",
-  "author": "F-Devel",
+  "author": "Devel",
   "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {

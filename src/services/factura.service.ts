@@ -142,6 +142,7 @@ export class FacturaService {
     const factura = new Factura({
       empresa_emisora_id: datos.empresaId,
       cliente_id: datos.clienteId,
+      usuario_id:datos.usuarioId,
       fecha_emision: datos.fechaEmision,
       clave_acceso: datos.claveAcceso,
       secuencial: datos.secuencial,
@@ -241,6 +242,7 @@ export class FacturaService {
     const facturaCreada = await this.crearFactura({
       empresaId: empresa._id,
       clienteId: cliente._id,
+      usuarioId: datosFactura.usuario_id,
       fechaEmision,
       claveAcceso,
       secuencial,
@@ -708,6 +710,7 @@ export class FacturaService {
         }
       }
       const datosFactura: InvoiceRequest = {
+        usuario_id:factura.datos_originales?factura.datos_originales.usuario_id:'',
         infoTributaria: factura.datos_originales
           ? JSON.parse(factura.datos_originales).infoTributaria
           : {},
@@ -717,6 +720,7 @@ export class FacturaService {
         detalles: factura.datos_originales
           ? JSON.parse(factura.datos_originales).detalles
           : []
+
       };
       await this.generarPDFFactura(
         factura,

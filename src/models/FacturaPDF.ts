@@ -21,6 +21,7 @@ export interface IFacturaPDF extends Document {
 }
 
 const FacturaPDFSchema: Schema = new Schema({
+  usuario_id: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   factura_id: { type: String, required: true, ref: 'Invoice' },
   claveAcceso: { type: String, required: true, unique: true },
   pdf_path: { type: String, required: true },
@@ -43,8 +44,8 @@ const FacturaPDFSchema: Schema = new Schema({
   email_intentos: { type: Number, required: true, default: 0 },
   email_ultimo_error: { type: String },
   email_enviado_por: { type: String },
-},{
-    timestamps: true, // Add createdAt and updatedAt
-  },);
+}, {
+  timestamps: true, // Add createdAt and updatedAt
+},);
 
 export default mongoose.model<IFacturaPDF>('FacturaPDF', FacturaPDFSchema);

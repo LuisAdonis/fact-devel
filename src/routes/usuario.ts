@@ -40,14 +40,18 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Actualizar usuario
 router.put('/:id', async (req, res) => {
   try {
     const data = { ...req.body };
     if (!("contrasena" in data)) {
       delete data.contrasena;
     }
-    if (!data.contrasena) {
+    if (data.contrasena) {
+      // Si viene en el body y tiene valor, encriptamos
+      const hashedPassword = await bcrypt.hash(data.contrasena, 10);
+      data.contrasena = hashedPassword;
+    } else {
+      // Si no viene o viene vacío/null/undefined, no la actualizamos
       delete data.contrasena;
     }
     const usuario = await Usuario.findByIdAndUpdate(req.params.id, data, { new: true },).select('-contrasena');

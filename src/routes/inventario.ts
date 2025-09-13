@@ -13,9 +13,12 @@ router.post('/', async (req, res) => {
   try {
     console.log('agg stock product with data:', req.body);
     const doc = new Inventario(req.body);
+
     await doc.save();
     res.status(201).json(doc);
   } catch (err) {
+    console.log(err);
+
     res.status(500).json({ message: err || 'Server error' });
   }
 });
@@ -46,6 +49,7 @@ router.put('/update/:id', async (req, res) => {
     const cantidad = req.body.cantidad;
     const tipo = req.body.tipov;
     const ahora = new Date();
+    const usuarioId = req.body.usuario_id; // según de dónde lo saques
 
 
     const inventarios = await Inventario.find({
@@ -59,6 +63,7 @@ router.put('/update/:id', async (req, res) => {
 
 
     if (inventarios.length === 0) {
+      //aqui
       return res.status(404).json({ message: 'No hay stock disponible' });
     }
 
@@ -99,12 +104,12 @@ router.put('/update/:id', async (req, res) => {
           }
         }
       }
-
+      inv.usuario_update = usuarioId;
       await inv.save();
     }
 
     if (restante > 0) {
-      return res.status(400).json({ message: 'No hay suficiente stock para completar la operación' });
+      return res.status(201).json({ message: 'No hay suficiente stock para completar la operación' });
     }
     res.json(inventarios);
   } catch (err) {

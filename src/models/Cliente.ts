@@ -1,6 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ICliente extends Document {
+  usuario_id: Types.ObjectId;        // Cajero que abre/cierra
   tipo_identificacion_id: Types.ObjectId;
   identificacion: string;
   razon_social: string;
@@ -11,6 +12,8 @@ export interface ICliente extends Document {
 
 const schema = new Schema<ICliente>({
   tipo_identificacion_id: { type: Schema.Types.ObjectId, ref: 'IdentificationType', required: true },
+  usuario_id: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
+
   identificacion: { type: String, required: true },
   razon_social: { type: String, required: true },
   direccion: { type: String },
