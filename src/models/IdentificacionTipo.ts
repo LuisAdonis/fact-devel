@@ -8,6 +8,8 @@ export interface IIdentificacionTipo extends Document {
 const schema = new Schema<IIdentificacionTipo>({
   codigo: { type: String, required: true },
   descripcion: { type: String, required: true },
-});
+},{
+    timestamps: true, // Add createdAt and updatedAt
+  },);
 
 export default model<IIdentificacionTipo>('IdentificacionTipo', schema);

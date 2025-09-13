@@ -14,6 +14,8 @@ const UsuarioSchema = new Schema<IUsuario>({
   nombre: { type: String, required: true },
   contrasena: { type: String, required: true },
   administrador: { type: Boolean, default: false },
-});
+},{
+    timestamps: true, // Add createdAt and updatedAt
+  },);
 
 export default model<IUsuario>('Usuario', UsuarioSchema);

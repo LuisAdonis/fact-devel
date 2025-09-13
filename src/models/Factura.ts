@@ -42,6 +42,8 @@ const schema = new Schema<IFactura>({
   sri_fecha_envio: { type: Date },
   sri_fecha_respuesta: { type: Date },
   datos_originales: { type: String },
-});
+}, {
+  timestamps: true, // Add createdAt and updatedAt
+},);
 
 export default model<IFactura>('Factura', schema);

@@ -16,6 +16,8 @@ const schema = new Schema<IFacturaDetalle>({
   precio_unitario: { type: Number, required: true },
   subtotal: { type: Number, required: true },
   valor_iva: { type: Number, required: true },
-});
+},{
+    timestamps: true, // Add createdAt and updatedAt
+  },);
 
 export default model<IFacturaDetalle>('FacturaDetalle', schema);

@@ -43,8 +43,9 @@ const schema = new Schema<IProducto>({
   tipo_medicamento: { type: String },
 
 }, {
-  toJSON: { virtuals: true },   // 👈 importante
-  toObject: { virtuals: true }
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+  timestamps: true,
 });
 schema.virtual('inventarios', {
   ref: 'Inventario',

@@ -18,6 +18,8 @@ const schema = new Schema<IInventario>({
     unidades_caja: { type: Number, required: true },
     lote: { type: String, required: true },
     fecha_caducidad: { type: Date, required: true },
-});
+},{
+    timestamps: true, // Add createdAt and updatedAt
+  },);
 
 export default model<IInventario>('Inventario', schema);

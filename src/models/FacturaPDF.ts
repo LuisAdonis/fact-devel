@@ -43,6 +43,8 @@ const FacturaPDFSchema: Schema = new Schema({
   email_intentos: { type: Number, required: true, default: 0 },
   email_ultimo_error: { type: String },
   email_enviado_por: { type: String },
-});
+},{
+    timestamps: true, // Add createdAt and updatedAt
+  },);
 
 export default mongoose.model<IFacturaPDF>('FacturaPDF', FacturaPDFSchema);

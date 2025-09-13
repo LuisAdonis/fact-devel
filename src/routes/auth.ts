@@ -145,7 +145,6 @@ router.post('/register', async (req, res) => {
     // Create user
 
     const hashedPassword = await bcrypt.hash(contrasena, 10);
-    console.log(company._id+"-------------")
     const user = new Usuario({ nombre: nombre, correo: correo, contrasena: hashedPassword, administrador: true, empresa_id:company._id});
     await user.save();
     // Generate token

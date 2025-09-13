@@ -16,9 +16,10 @@ const schema = new Schema<ICliente>({
   direccion: { type: String },
   email: { type: String },
   telefono: { type: String },
-},{
-  toJSON: { virtuals: true }, 
-  toObject: { virtuals: true }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+  timestamps: true, // Add createdAt and updatedAt
 });
 
 schema.virtual('identificacions', {
@@ -27,6 +28,6 @@ schema.virtual('identificacions', {
   foreignField: '_id',
   justOne: true
 
-  
+
 });
 export default model<ICliente>('Cliente', schema);
