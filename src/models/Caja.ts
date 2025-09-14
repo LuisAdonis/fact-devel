@@ -10,7 +10,7 @@ export interface ICaja extends Document {
   monto_tarjeta?: number;
   monto_transferencia?: number;
   diferencia?: number;               // Monto_contado - Monto esperado
-  estado: 'ABIERTO' | 'CERRADO';
+  estado: boolean;
   observaciones?: string;
 }
 const CajaSchema = new Schema<ICaja>({
@@ -23,7 +23,7 @@ const CajaSchema = new Schema<ICaja>({
   monto_tarjeta: { type: Number },
   monto_transferencia: { type: Number },
   diferencia: { type: Number },
-  estado: { type: String, enum: ['ABIERTO', 'CERRADO'], default: 'ABIERTO' },
+  estado: { type: Boolean, default: true },
   observaciones: { type: String },
 }, {
   timestamps: true

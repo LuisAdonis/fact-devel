@@ -15,7 +15,7 @@ interface CierreCajaProfesionalInput {
 export const cerrarCajaProfesional = async ({ cajaId, montoContado }: CierreCajaProfesionalInput) => {
   const caja = await CajaModel.findById(cajaId) as ICaja;
   if (!caja) throw new Error('Caja no encontrada');
-  if (caja.estado === 'CERRADO') throw new Error('La caja ya está cerrada');
+  if (!caja.estado) throw new Error('La caja ya está cerrada');
 
   const usuario = await UsuarioModel.findById(caja.usuario_id);
   const pagos = await FacturaPagoModel.find({ caja_id: caja._id });
@@ -91,7 +91,7 @@ export const cerrarCajaProfesional = async ({ cajaId, montoContado }: CierreCaja
   caja.monto_tarjeta = totalTarjeta;
   caja.monto_transferencia = totalTransferencia;
   caja.diferencia = diferencia;
-  caja.estado = 'CERRADO';
+  caja.estado = false;
   await caja.save();
 
   return {

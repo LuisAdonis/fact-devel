@@ -1,14 +1,30 @@
 import { Router } from 'express';
 import CajaModel from '../models/Caja';
 import { cerrarCajaProfesional } from '../services/cerrarCajaProfesional';
+import  CierreCaja  from '../models/CierreCajaModel';
 const router = Router();
 
 // Crear caja
 router.post('/', async (req, res) => {
   try {
-    const caja = new CajaModel(req.body);
+    const { usuario_id, monto_inicial } = req.body;
+    const cajaAbierta = await CajaModel.findOne({ usuario_id, estado: true });
+    if (cajaAbierta) {
+      return res.status(400).json({
+        error: 'Este usuario ya tiene una caja abierta. Debe cerrarla antes de abrir otra.'
+      });
+    }
+    // Crear nueva caja
+    const caja = new CajaModel({
+      usuario_id,
+      monto_inicial,
+      estado: true,
+      fecha_apertura: new Date()
+    });
+
     await caja.save();
     res.json(caja);
+
   } catch (err) {
     res.status(500).json({ message: err || 'Server error' });
   }
@@ -19,15 +35,42 @@ router.get('/', async (req, res) => {
   const cajas = await CajaModel.find();
   res.json(cajas);
 });
-
-// Cierre de caja profesional
+router.get('/:id', async (req, res) => {
+  const cajas = await CajaModel.find({
+    usuario_id: req.params.id,
+    estado:true,
+  });
+  res.json(cajas);
+});
 router.post('/cerrar/:id', async (req, res) => {
   try {
-    const { montoContado } = req.body;
-    const reporte = await cerrarCajaProfesional({ cajaId: req.params.id, montoContado });
-    res.json(reporte);
-  } catch (err) {
-    res.status(500).json({ message: err || 'Server error' });
+    const { id } = req.params;
+    const { usuario_id, monto_contado, observaciones } = req.body;
+    const caja = await CajaModel.findById(id);
+    if (!caja) return res.status(404).json({ error: 'Caja no encontrada' });
+    if (!caja.estado)
+      return res.status(400).json({ error: 'La caja ya está cerrada' });
+
+    // Generar reporte
+    const reporte = await cerrarCajaProfesional({cajaId: id, montoContado: monto_contado});
+
+    // Guardar reporte
+    const cierre = new CierreCaja({
+      ...reporte,
+      usuario_id,
+      observaciones
+    });
+    await cierre.save();
+
+    // Cerrar caja
+    caja.estado = false;
+    caja.fecha_cierre = new Date();
+    await caja.save();
+
+    res.json({ mensaje: 'Caja cerrada correctamente', cierre });
+
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
