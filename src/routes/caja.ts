@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import CajaModel from '../models/Caja';
 import { cerrarCajaProfesional } from '../services/cerrarCajaProfesional';
-import  CierreCaja  from '../models/CierreCajaModel';
+import CierreCaja from '../models/CierreCajaModel';
 const router = Router();
 
 // Crear caja
@@ -23,7 +23,11 @@ router.post('/', async (req, res) => {
     });
 
     await caja.save();
-    res.json(caja);
+    const respuesta = {
+      ...caja.toObject(),   // convierte el documento en objeto plano
+      mensaje: "Caja abierta correctamente", // tu campo adicional
+    };
+    res.json(respuesta);
 
   } catch (err) {
     res.status(500).json({ message: err || 'Server error' });
@@ -36,12 +40,21 @@ router.get('/', async (req, res) => {
   res.json(cajas);
 });
 router.get('/:id', async (req, res) => {
-  const cajas = await CajaModel.find({
+  const cajas = await CajaModel.findOne({
     usuario_id: req.params.id,
-    estado:true,
+    estado: true,
   });
-  res.json(cajas);
+  if (cajas) {
+    const respuesta = {
+      ...cajas.toObject(),   // convierte el documento en objeto plano
+      mensaje: "Caja abierta correctamente", // tu campo adicional
+    };
+    res.json(respuesta);
+  } else {
+    res.json({});
+  }
 });
+
 router.post('/cerrar/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,7 +65,7 @@ router.post('/cerrar/:id', async (req, res) => {
       return res.status(400).json({ error: 'La caja ya está cerrada' });
 
     // Generar reporte
-    const reporte = await cerrarCajaProfesional({cajaId: id, montoContado: monto_contado});
+    const reporte = await cerrarCajaProfesional({ cajaId: id, montoContado: monto_contado });
 
     // Guardar reporte
     const cierre = new CierreCaja({
