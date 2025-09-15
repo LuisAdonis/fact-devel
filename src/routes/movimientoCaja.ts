@@ -15,9 +15,13 @@ router.post('/', async (req, res) => {
 });
 
 // Listar movimientos
-router.get('/', async (req, res) => {
-  const movimientos = await MovimientoCajaModel.find();
-  res.json(movimientos);
+router.get('/:id', async (req, res) => {
+  try {
+    const movimientos = await MovimientoCajaModel.find({ caja_id: req.params.id });
+    res.json(movimientos);
+  } catch (err) {
+    res.status(500).json({ message: err || 'Server error' });
+  }
 });
 
 export default router;

@@ -4,6 +4,7 @@ export interface ICierreCaja extends Document {
   caja_id: Types.ObjectId;
   usuario_id: Types.ObjectId;
   fecha_cierre: Date;
+  fecha_apertura: Date;
   totales: {
     efectivo: number;
     tarjeta: number;
@@ -38,6 +39,7 @@ const schema = new Schema<ICierreCaja>({
   caja_id: { type: Schema.Types.ObjectId, ref: 'Caja', required: true },
   usuario_id: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fecha_cierre: { type: Date, default: Date.now },
+  fecha_apertura: { type: Date, default: Date.now },
   totales: {
     efectivo: { type: Number, default: 0 },
     tarjeta: { type: Number, default: 0 },
@@ -66,7 +68,7 @@ const schema = new Schema<ICierreCaja>({
   ],
   movimientos_extra: [
     {
-      tipo: { type: String, enum: ['INGRESO', 'EGRESO'] },
+      tipo: { type: String, enum: ['INGRESO', 'EGRESO','INICIO'] },
       concepto: String,
       monto: Number
     }

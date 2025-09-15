@@ -2,6 +2,8 @@ import { Router } from 'express';
 import CajaModel from '../models/Caja';
 import { cerrarCajaProfesional } from '../services/cerrarCajaProfesional';
 import CierreCaja from '../models/CierreCajaModel';
+import MovimientoCaja from '../models/MovimientoCaja';
+
 const router = Router();
 
 // Crear caja
@@ -23,9 +25,19 @@ router.post('/', async (req, res) => {
     });
 
     await caja.save();
+    const mov = new MovimientoCaja({
+      caja_id: caja.id,
+      usuario_id: caja.usuario_id,
+      tipo: 'INICIO',
+      concepto: 'Apertura de Caja',
+      monto: caja.monto_inicial,
+    });
+    await mov.save();
     const respuesta = {
-      ...caja.toObject(),   // convierte el documento en objeto plano
-      mensaje: "Caja abierta correctamente", // tu campo adicional
+      ...caja.toObject(),
+      mensaje: "Caja abierta correctamente",
+      movimientos: [mov.toObject()]
+
     };
     res.json(respuesta);
 
@@ -39,16 +51,22 @@ router.get('/', async (req, res) => {
   const cajas = await CajaModel.find();
   res.json(cajas);
 });
+
 router.get('/:id', async (req, res) => {
+
   const cajas = await CajaModel.findOne({
     usuario_id: req.params.id,
     estado: true,
   });
   if (cajas) {
+    const movimientos = await MovimientoCaja.find({ caja_id: cajas._id });
+
     const respuesta = {
-      ...cajas.toObject(),   // convierte el documento en objeto plano
-      mensaje: "Caja abierta correctamente", // tu campo adicional
+      ...cajas.toObject(),
+      mensaje: "Caja abierta correctamente",
+      movimientos: movimientos.map(m => m.toObject()), // lo devuelves en []
     };
+
     res.json(respuesta);
   } else {
     res.json({});

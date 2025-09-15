@@ -49,6 +49,7 @@ export const cerrarCajaProfesional = async ({ cajaId, montoContado }: CierreCaja
   movimientos.forEach(mov => {
     if (mov.tipo === 'INGRESO') totalIngresos += mov.monto;
     if (mov.tipo === 'EGRESO') totalEgresos += mov.monto;
+    if (mov.tipo=='INICIO')0;
   });
 
   const facturaIds = pagos.map(p => p.factura_id);
