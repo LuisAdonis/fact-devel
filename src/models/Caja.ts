@@ -1,15 +1,15 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ICaja extends Document {
-  usuario_id: Types.ObjectId;        // Cajero que abre/cierra
+  usuario_id: Types.ObjectId;       
   fecha_apertura: Date;
   fecha_cierre?: Date;
   monto_inicial: number;
-  monto_contado?: number;            // Total contado al cerrar
+  monto_contado?: number;       
   monto_efectivo?: number;
   monto_tarjeta?: number;
   monto_transferencia?: number;
-  diferencia?: number;               // Monto_contado - Monto esperado
+  diferencia?: number;               
   estado: boolean;
   observaciones?: string;
 }

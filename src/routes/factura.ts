@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Factura from '../models/Factura';
 import { FacturaService } from '../services/factura.service';
+import FacturaPago from '../models/FacturaPago';
 const router = Router();
 
 router.post('/', async (req, res) => {

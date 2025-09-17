@@ -86,7 +86,7 @@ app.get('/health', (_req, res) => {
     SRI_ENVIRONMENT: process.env.SRI_ENVIRONMENT || 'development',
   });
 });
-// app.use(corsTestRoutes);
+app.use(corsTestRoutes);
 
 
 // app.use(verifyToken);

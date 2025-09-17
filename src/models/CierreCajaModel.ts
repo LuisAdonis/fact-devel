@@ -27,8 +27,8 @@ export interface ICierreCaja extends Document {
       iva: number;
     }>;
   }>;
-  movimientos_extra: Array<{
-    tipo: 'INGRESO' | 'EGRESO';
+  movimientos: Array<{
+    tipo: 'INGRESO' | 'EGRESO'|'INICIO'|'FACTURA';
     concepto: string;
     monto: number;
   }>;
@@ -66,9 +66,9 @@ const schema = new Schema<ICierreCaja>({
       ]
     }
   ],
-  movimientos_extra: [
+  movimientos: [
     {
-      tipo: { type: String, enum: ['INGRESO', 'EGRESO','INICIO'] },
+      tipo: { type: String, enum: ['INGRESO', 'EGRESO','INICIO','FACTURA'] },
       concepto: String,
       monto: Number
     }

@@ -3,6 +3,7 @@ import CajaModel from '../models/Caja';
 import { cerrarCajaProfesional } from '../services/cerrarCajaProfesional';
 import CierreCaja from '../models/CierreCajaModel';
 import MovimientoCaja from '../models/MovimientoCaja';
+import CierreCajaModel from '../models/CierreCajaModel';
 
 const router = Router();
 
@@ -50,6 +51,14 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   const cajas = await CajaModel.find();
   res.json(cajas);
+});
+router.get('/cierre', async (req, res) => {
+  try {
+    const cajas = await CierreCajaModel.find();
+    res.json(cajas);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
 router.get('/:id', async (req, res) => {

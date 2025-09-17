@@ -50,6 +50,7 @@ export const cerrarCajaProfesional = async ({ cajaId, montoContado }: CierreCaja
     if (mov.tipo === 'INGRESO') totalIngresos += mov.monto;
     if (mov.tipo === 'EGRESO') totalEgresos += mov.monto;
     if (mov.tipo=='INICIO')0;
+    if (mov.tipo=='FACTURA')0;
   });
 
   const facturaIds = pagos.map(p => p.factura_id);
@@ -111,7 +112,7 @@ export const cerrarCajaProfesional = async ({ cajaId, montoContado }: CierreCaja
       diferencia
     },
     facturas: facturasDetalle,
-    movimientos_extra: movimientos.map(m => ({
+    movimientos: movimientos.map(m => ({
       tipo: m.tipo,
       concepto: m.concepto,
       monto: m.monto
