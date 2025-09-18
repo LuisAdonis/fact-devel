@@ -54,8 +54,13 @@ router.get('/', async (req, res) => {
 });
 router.get('/cierre', async (req, res) => {
   try {
-    const cajas = await CierreCajaModel.find();
-    res.json(cajas);
+    const cajas = await CierreCajaModel.find().populate('usuario_id', 'nombre').lean();
+     const response = cajas.map(c => ({
+      ...c,
+      usuario: c.usuario_id,   // renombramos
+      usuario_id: undefined    // eliminamos el anterior
+    }));
+    res.json(response);
   } catch (error) {
     res.status(500).json({ error: error });
   }
