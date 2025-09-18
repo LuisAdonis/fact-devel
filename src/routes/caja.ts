@@ -38,7 +38,6 @@ router.post('/', async (req, res) => {
       ...caja.toObject(),
       mensaje: "Caja abierta correctamente",
       movimientos: [mov.toObject()]
-
     };
     res.json(respuesta);
 

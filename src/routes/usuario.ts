@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Usuario from '../models/Usuario';
+import Permisos from '../models/Permisos';
 import bcrypt from 'bcryptjs';
 
 const router = Router();
@@ -12,6 +13,7 @@ router.post('/', async (req, res) => {
       contrasena,
       nombre,
       empresa_id,
+      permisos,
     } = req.body;
 
     if (!correo || !contrasena) {
@@ -24,7 +26,18 @@ router.post('/', async (req, res) => {
     const hashedPassword = await bcrypt.hash(contrasena, 10);
     const user = new Usuario({ nombre: nombre, correo: correo, contrasena: hashedPassword, administrador: false, empresa_id: empresa_id });
     await user.save();
-    res.json(user);
+
+    const permisosDoc = new Permisos({
+      usuario_id: user._id,
+      ...permisos,
+    });
+    await permisosDoc.save();
+
+    res.json({
+      ...user.toObject(),
+       permiso: permisosDoc,
+    });
+
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -33,7 +46,7 @@ router.post('/', async (req, res) => {
 // Listar todos los usuarios
 router.get('/', async (req, res) => {
   try {
-    const usuarios = await Usuario.find({ administrador: { $ne: 1 } }).select('-__v');
+    const usuarios = await Usuario.find({ administrador: { $ne: 1 } }).populate('permiso');
     res.json(usuarios);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -42,7 +55,7 @@ router.get('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const data = { ...req.body };
+    const { permisos, ...data } = req.body;
     if (!("contrasena" in data)) {
       delete data.contrasena;
     }
@@ -57,7 +70,19 @@ router.put('/:id', async (req, res) => {
     const usuario = await Usuario.findByIdAndUpdate(req.params.id, data, { new: true },).select('-contrasena');
 
     if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json(usuario);
+
+    let permisosDoc;
+    if (permisos) {
+      permisosDoc = await Permisos.findOneAndUpdate(
+        { usuario_id: usuario._id },
+        { $set: permisos },
+        { new: true, upsert: true }
+      );
+    }
+    res.json({
+      ...usuario.toObject(), // convierte el documento Mongoose a objeto
+      permiso: permisosDoc
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

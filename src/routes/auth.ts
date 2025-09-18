@@ -165,7 +165,7 @@ router.post('/auth', async (req, res) => {
   }
 
   try {
-    const user = await Usuario.findOne({ correo });
+    const user = await Usuario.findOne({ correo }).populate('permiso');
     if (!user) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
@@ -191,13 +191,7 @@ router.post('/auth', async (req, res) => {
 
     return res.json({
       token,
-      user: {
-        id: user._id,
-        email: user.correo,
-        nombre:user.nombre,
-        admnistrdor: user.administrador,
-
-      },
+      user:user,
       company: company
         ? {
           id: company._id,
