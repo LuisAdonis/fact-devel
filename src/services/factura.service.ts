@@ -520,6 +520,7 @@ export class FacturaService {
       const invoicePDF = new FacturaPDF({
         factura_id: factura._id,
         claveAcceso: factura.clave_acceso,
+        usuario_id:factura.usuario_id,
         pdf_path: pdfPath,
         pdf_buffer: pdfBuffer,
         tamano_archivo: pdfBuffer.length,
@@ -537,6 +538,7 @@ export class FacturaService {
           factura_id: factura._id,
           claveAcceso: factura.clave_acceso,
           pdf_path: '',
+          usuario_id:factura.usuario_id,
           tamano_archivo: 0,
           numero_autorizacion: factura.clave_acceso,
           fecha_autorizacion: new Date(),

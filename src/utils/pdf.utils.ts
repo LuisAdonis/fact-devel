@@ -148,6 +148,11 @@ function generateInvoiceHTML(data: FacturaData): string {
           padding: 3px 5px;
           font-size: 9px;
         }
+          .logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
         .amount {
           text-align: right;
           font-weight: bold;
@@ -159,7 +164,10 @@ function generateInvoiceHTML(data: FacturaData): string {
         <!-- Header Section -->
         <div class="header">
           <div class="logo-section">
-            <div class="no-logo">NO TIENE LOGO</div>
+
+          ${empresa.logo
+      ? `<img src="${empresa.logo}" alt="Logo" class="logo-img" />`
+      : `<div class="no-logo">NO TIENE LOGO</div>`}
           </div>
           
           <div class="company-info">
@@ -397,10 +405,9 @@ export async function savePDFToFile(pdfBuffer: Buffer, filename: string): Promis
   const tempDir = os.tmpdir();
   const downloadsDir = path.join(os.homedir(), 'Downloads');
   const filePath = path.join(downloadsDir, `${filename}.pdf`);
+  // const filePath = path.join('/app/pdfs', `${filename}.pdf`);
 
   // const filePath = path.join(tempDir, `${filename}.pdf`);
-
-
   fs.writeFileSync(filePath, pdfBuffer);
 
   return filePath;
