@@ -18,10 +18,13 @@ const storage = multer.diskStorage({
 
 
 const checkFileField = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.headers['content-type']?.includes('multipart/form-data')) {
-    return res.status(400).json({ error: 'Se requiere multipart/form-data con un archivo en "file"' });
+ if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return next();
   }
-  next();
+  if (req.is('application/json')) {
+    return next();
+  }
+  return res.status(400).json({ error: 'Formato de contenido no soportado' });
 };
 
 const upload = multer({ storage });
@@ -80,7 +83,14 @@ router.put('/:id',checkFileField, upload.single('file'), async (req, res) => {
     const doc = await Empresa.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!doc) return res.status(404).json({ message: 'Not found' });
     res.json(doc);
-  } catch (err) {
+  } catch (err:any) {
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({
+        message: 'Error de validación',
+        details: err.message,
+        errors: err.errors
+      });
+    }
     res.status(500).json({ message: err });
   }
 });

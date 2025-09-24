@@ -89,7 +89,7 @@ app.get('/health', (_req, res) => {
 app.use(corsTestRoutes);
 
 
-// app.use(verifyToken);
+app.use(verifyToken);
 app.use('/api/v1/identificacion-tipo', identificaciontipoRoutes);
 app.use('/api/v1/empresa', empresaRoutes);
 app.use('/api/v1/cliente', clienteRoutes);

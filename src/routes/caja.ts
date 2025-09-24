@@ -4,6 +4,7 @@ import { cerrarCajaProfesional } from '../services/cerrarCajaProfesional';
 import CierreCaja from '../models/CierreCajaModel';
 import MovimientoCaja from '../models/MovimientoCaja';
 import CierreCajaModel from '../models/CierreCajaModel';
+import Caja from '../models/Caja';
 
 const router = Router();
 
@@ -117,5 +118,15 @@ router.post('/cerrar/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+router.delete('/:id', async (req, res) => {
+  try {
+    const cajaReporte = await CierreCajaModel.findByIdAndDelete(req.params.id);
+    const caja = await CajaModel.findByIdAndDelete(req.body.caja_id);
+    if (!cajaReporte) return res.status(404).json({ error: 'Reporte no encontrada' });
+    if (!caja) return res.status(404).json({ error: 'caja no encontrada' });
+    res.json({ message: 'Deleted caja y reporte' });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+});
 export default router;

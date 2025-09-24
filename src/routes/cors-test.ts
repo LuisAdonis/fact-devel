@@ -12,6 +12,7 @@ import FacturaPago from '../models/FacturaPago';
 
 import Inventario from '../models/Inventario';
 import CierreCaja from '../models/CierreCajaModel';
+import Producto from '../models/Producto';
 
 
 const router = Router();
@@ -68,8 +69,10 @@ router.post('/data-deleted', async (req: Request, res: Response) => {
     await FacturaDetalle.deleteMany({});
     await FacturaPago.deleteMany({});
     // await Inventario.deleteMany({});
+    // await Producto.deleteMany({});
     await CierreCaja.deleteMany({});
-
+    console.log({ message: "Todas las tablas han sido vaciadas" });
+    
     res.json({ message: "Todas las tablas han sido vaciadas" });
 
   } catch (error) {
