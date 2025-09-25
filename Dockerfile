@@ -1,5 +1,5 @@
 # Stage 1: build
-FROM node:18-alpine AS build
+FROM node:slim AS build
 WORKDIR /app
 
 # Copiar package.json y package-lock.json
@@ -15,12 +15,12 @@ COPY . .
 RUN npm run build   # esto genera dist/
 
 # Stage 2: producción
-FROM node:18-alpine AS prod
+FROM node:slim AS prod
 WORKDIR /app
 
 # Copiar solo las dependencias de producción
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --only=production && npm cache clean --force
 
 # Copiar el código compilado desde el build
 COPY --from=build /app/dist ./dist
