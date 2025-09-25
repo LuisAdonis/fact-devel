@@ -88,6 +88,7 @@ app.get('/health', (_req, res) => {
 });
 app.use(corsTestRoutes);
 
+app.use('/api/v1/factura-pdf',facturaPDFRoutes);
 
 app.use(verifyToken);
 app.use('/api/v1/identificacion-tipo', identificaciontipoRoutes);
