@@ -3,6 +3,7 @@ import { IEmpresa } from '../models/Empresa';
 import { ICliente } from '../models/Cliente';
 import { IProducto } from '../models/Producto';
 import { InvoiceRequest } from '../interfaces/invoice.interface';
+import { debug } from 'console';
 
 /**
  * Genera un documento XML para una factura electrónica según el formato del SRI de Ecuador
@@ -93,13 +94,17 @@ export function generarXMLFactura(
     .txt('2')
     .up()
     .ele('codigoPorcentaje')
-    .txt('2')
+    .txt('4')
     .up()
     .ele('baseImponible')
     .txt(factura.infoFactura.totalSinImpuestos)
     .up()
     .ele('valor')
-    .txt(productos.reduce((acc, p) => (p.tiene_iva ? acc + 0.12 * p.precio_unitario : acc), 0).toFixed(2))
+    .txt(factura.detalles.reduce((acc, p) =>{
+          const precioBase = Number( p.detalle.cantidad )* Number(p.detalle.precioUnitario);
+    return acc + precioBase * 0.15;
+
+    }, 0).toFixed(2))
     .up()
     .up()
     .up()

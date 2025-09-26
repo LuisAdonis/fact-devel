@@ -5,6 +5,9 @@ export interface ProductDetail {
     cantidad: string;
     precioUnitario: string;
     precioTotalSinImpuesto: string;
+
+  tipoV: boolean;
+
     impuestos: Array<{
       impuesto: {
         codigo: string;
@@ -24,7 +27,8 @@ export interface InvoiceInfo {
   razonSocialComprador: string;
   totalSinImpuestos: string;
   importeTotal: string;
-  importeIvao:string,
+  importeIvao: string;
+
 }
 
 export interface TaxInfo {
@@ -34,7 +38,7 @@ export interface TaxInfo {
 }
 
 export interface InvoiceRequest {
-  usuario_id:string;
+  usuario_id: string;
   infoTributaria: TaxInfo;
   infoFactura: InvoiceInfo;
   detalles: ProductDetail[];

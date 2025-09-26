@@ -17,6 +17,7 @@
     "@types/nodemailer": "^7.0.1",
     "@types/puppeteer": "^7.0.4",
     "@xmldom/xmldom": "^0.8.11",
+    "archiver": "^7.0.1",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -34,6 +35,7 @@
     "xmlbuilder2": "^3.1.1"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
     "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
@@ -53,6 +55,6 @@
     "typescript": "^5.9.2"
   },
   "overrides": {
-  "tar-fs": "3.1.1"
-}
+    "tar-fs": "3.1.1"
+  }
 }

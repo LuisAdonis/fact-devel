@@ -249,7 +249,7 @@ function generateInvoiceHTML(data: FacturaData): string {
                   <td>${det.cantidad}</td>
                   <td>Und</td>
                   <td class="text-left">${det.descripcion}</td>
-                  <td class="text-left">${producto.descripcion_adicional || ''}</td>
+                  <td class="text-left"></td>
                   <td class="text-right">$${parseFloat(det.precioUnitario).toFixed(2)}</td>
                   <td class="text-right">$0.00</td>
                   <td class="text-right">$${parseFloat(det.precioTotalSinImpuesto).toFixed(2)}</td>
