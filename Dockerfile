@@ -24,6 +24,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copiar el código compilado desde el build
 COPY --from=build /app/dist ./dist
+RUN mkdir -p /app/pdfs
+
 
 # Exponer puerto
 EXPOSE 3000

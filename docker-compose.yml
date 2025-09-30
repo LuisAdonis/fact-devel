@@ -6,7 +6,7 @@ services:
       - "3000:3000"
     restart: always
     volumes:
-      - ./pdfs:/app/pdfs 
+      - ./pdfs:/app/pdfs
     environment:
       JWT_SECRET: 123223DAS
       NODE_ENV: development

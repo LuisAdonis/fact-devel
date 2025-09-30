@@ -398,17 +398,13 @@ export async function generateInvoicePDF(facturaData: FacturaData): Promise<Buff
  * Saves PDF to file system
  */
 export async function savePDFToFile(pdfBuffer: Buffer, filename: string): Promise<string> {
-  const fs = require('fs');
+  const fs = require('fs').promises;
   const path = require('path');
-  const os = require('os');
-
-  const tempDir = os.tmpdir();
-  const downloadsDir = path.join(os.homedir(), 'Downloads');
-  const filePath = path.join(downloadsDir, `${filename}.pdf`);
-  // const filePath = path.join('/app/pdfs', `${filename}.pdf`);
-
-  // const filePath = path.join(tempDir, `${filename}.pdf`);
-  fs.writeFileSync(filePath, pdfBuffer);
-
+  
+  const pdfDir = path.join('/app', 'pdfs');
+  const filePath = path.join(pdfDir, `${filename}.pdf`);
+  
+  await fs.writeFile(filePath, pdfBuffer);
+  
   return filePath;
 }
