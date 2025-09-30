@@ -2,3 +2,5 @@ node_modules
 uploads
 dist
 backups/*
+certificado.p12
+certificado.p12

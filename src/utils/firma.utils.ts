@@ -71,19 +71,70 @@ export async function firmarXML(xmlString: string, pemPath: string, password: st
       digestAlgorithm: 'http://www.w3.org/2000/09/xmldsig#sha1',
     });
 
-    sig.keyInfoProvider = {
-      getKeyInfo(): string {
-        return `<X509Data><X509Certificate>${certPem
-          .replace('-----BEGIN CERTIFICATE-----', '')
-          .replace('-----END CERTIFICATE-----', '')
-          .replace(/\r?\n|\r/g, '')}</X509Certificate></X509Data>`;
-      },
-    } as KeyInfoProvider;
+    // sig.keyInfoProvider = {
+    //   getKeyInfo(): string {
+    //     return `<X509Data><X509Certificate>${certPem
+    //       .replace('-----BEGIN CERTIFICATE-----', '')
+    //       .replace('-----END CERTIFICATE-----', '')
+    //       .replace(/\r?\n|\r/g, '')}</X509Certificate></X509Data>`;
+    //   },
+    // } as KeyInfoProvider;
 
-    // Sign XML
-    const doc = new DOMParser().parseFromString(xmlString, 'text/xml');
-    sig.computeSignature(xmlString);
-    return sig.getSignedXml();
+      const keyInfoProvider = {
+            getKeyInfo: (key?: any, prefix?: string): string => {
+                const keyInfo = `<X509Data><X509Certificate>${certPart}</X509Certificate></X509Data>`;
+                console.log('KeyInfo generado:', keyInfo.substring(0, 100) + '...');
+                return keyInfo;
+            },
+            getKey: (keyInfo?: any): string => {
+                return privateKeyPem;
+            }
+        };
+
+        sig.keyInfoProvider = keyInfoProvider;
+
+ console.log('Computando firma...');
+
+        // Computar firma
+        sig.computeSignature(xmlString, {
+            location: {
+                reference: "//*[local-name(.)='factura']",
+                action: 'append'
+            },
+            prefix: ''
+        });
+
+        let signedXml = sig.getSignedXml();
+
+        console.log('Verificando XML firmado...');
+        console.log('Contiene <Signature>:', signedXml.includes('<Signature'));
+        console.log('Contiene <KeyInfo>:', signedXml.includes('<KeyInfo>'));
+        console.log('Contiene <X509Certificate>:', signedXml.includes('<X509Certificate>'));
+
+        // SI NO TIENE KeyInfo, agregarlo manualmente
+        if (!signedXml.includes('<KeyInfo>') || !signedXml.includes('<X509Certificate>')) {
+            console.log('⚠️  KeyInfo no se agregó automáticamente, insertando manualmente...');
+
+            // Insertar KeyInfo después de SignatureValue
+            const keyInfoXml = `<KeyInfo><X509Data><X509Certificate>${certPart}</X509Certificate></X509Data></KeyInfo>`;
+            signedXml = signedXml.replace(
+                '</SignatureValue>',
+                `</SignatureValue>${keyInfoXml}`
+            );
+
+            console.log('KeyInfo insertado manualmente');
+        }
+
+        // Validación final
+        if (!signedXml.includes('<X509Certificate>')) {
+            console.error('❌ XML firmado (primeros 500 caracteres):');
+            console.error(signedXml.substring(0, 500));
+            throw new Error('El certificado no se agregó a la firma');
+        }
+
+        console.log('✅ XML firmado correctamente con certificado');
+        return signedXml;
+
   } catch (error: any) {
     console.error('Error signing XML:', error.message);
     throw new Error(`Error al firmar XML: ${error.message}`);
@@ -95,4 +146,10 @@ export async function firmarXML(xmlString: string, pemPath: string, password: st
  */
 export function guardarXMLFirmado(xmlString: string, outputPath: string): void {
   fs.writeFileSync(outputPath, xmlString, { encoding: 'utf8' });
+    
+  console.log('=== Verificación de archivo PEM ===');
+  console.log('Contiene certificado:', xmlString.includes('BEGIN CERTIFICATE'));
+  console.log('Contiene clave privada RSA:', xmlString.includes('BEGIN RSA PRIVATE KEY'));
+  console.log('Contiene clave privada:', xmlString.includes('BEGIN PRIVATE KEY'));
+  console.log('Tamaño del archivo:', xmlString.length, 'bytes');
 }

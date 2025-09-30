@@ -315,8 +315,10 @@ export class FacturaService {
             }
           }
 
-          const pemPath = await FacturaService.convertP12ToPem(p12Path, workingPassword);
-          const xmlFirmado = await firmarXML(factura.xml, pemPath, workingPassword);
+          // const pemPath = await FacturaService.convertP12ToPem(p12Path, workingPassword);
+          const pemPath = await FacturaService.convertP12ToPem("E:\\Proyectos\\fact-devel\\certificado.p12", "develp");
+          
+          const xmlFirmado = await firmarXML(factura.xml, pemPath, "develp");
 
           factura.xml_firmado = xmlFirmado;
           await factura.save();
