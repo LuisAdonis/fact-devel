@@ -54,11 +54,11 @@ async function getDatabaseInfo(): Promise<any> {
   try {
     const mongoose = require('mongoose');
     const connection = mongoose.connection;
-    
+
     if (connection.readyState === 1) {
       const admin = connection.db.admin();
       const buildInfo = await admin.buildInfo();
-      
+
       return {
         mongodb_version: buildInfo.version,
         database_name: connection.name,
@@ -66,7 +66,7 @@ async function getDatabaseInfo(): Promise<any> {
         port: connection.port
       };
     }
-    
+
     return {
       mongodb_version: 'unknown',
       database_name: process.env.DB_NAME || 'unknown',
@@ -172,11 +172,11 @@ async function createJsonZip(jsonData: BackupData, outputPath: string): Promise<
     });
 
     archive.pipe(output);
-    
+
     // Agregar el archivo JSON principal
     const jsonString = JSON.stringify(jsonData, null, 2);
     archive.append(jsonString, { name: 'backup_data.json' });
-    
+
     // Crear archivos separados por colección para facilitar la restauración
     for (const [collectionName, documents] of Object.entries(jsonData.collections)) {
       if (documents.length > 0) {
@@ -184,7 +184,7 @@ async function createJsonZip(jsonData: BackupData, outputPath: string): Promise<
         archive.append(collectionJson, { name: `collections/${collectionName}.json` });
       }
     }
-    
+
     // Agregar archivo de metadatos
     const metadataJson = JSON.stringify({
       ...jsonData.metadata,
@@ -196,9 +196,9 @@ async function createJsonZip(jsonData: BackupData, outputPath: string): Promise<
         count: jsonData.collections[name].length
       }))
     }, null, 2);
-    
+
     archive.append(metadataJson, { name: 'metadata.json' });
-    
+
     archive.finalize();
   });
 }
@@ -207,7 +207,7 @@ async function createJsonZip(jsonData: BackupData, outputPath: string): Promise<
 router.post('/backup/full', async (req: Request, res: Response) => {
   try {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
+
     // Crear directorio de respaldos si no existe
     const backupsDir = path.join(process.cwd(), 'backups');
     if (!fs.existsSync(backupsDir)) {
@@ -216,14 +216,14 @@ router.post('/backup/full', async (req: Request, res: Response) => {
 
     // Crear respaldo completo
     const backupData = await createCompleteBackup();
-    
+
     // Crear archivo ZIP comprimido
     const zipPath = path.join(backupsDir, `full_backup_${timestamp}.zip`);
     await createJsonZip(backupData, zipPath);
 
     // Información del archivo creado
     const stats = fs.statSync(zipPath);
-    
+
     res.json({
       success: true,
       message: 'Respaldo completo creado exitosamente',
@@ -256,7 +256,7 @@ router.post('/backup/data', async (req: Request, res: Response) => {
   try {
     const backupData = await createCompleteBackup();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
+
     // Crear directorio de respaldos si no existe
     const backupsDir = path.join(process.cwd(), 'backups');
     if (!fs.existsSync(backupsDir)) {
@@ -310,7 +310,7 @@ router.get('/backup/full/download/:filename', (req: Request, res: Response) => {
     }
 
     const stats = fs.statSync(backupPath);
-    
+
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', stats.size);
@@ -343,7 +343,7 @@ router.get('/backup/data/download/:filename', (req: Request, res: Response) => {
 
     const ext = path.extname(filename).toLowerCase();
     const contentType = ext === '.zip' ? 'application/zip' : 'application/json';
-    
+
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
@@ -363,23 +363,21 @@ router.get('/backup/data/download/:filename', (req: Request, res: Response) => {
 router.get('/backup/list', (req: Request, res: Response) => {
   try {
     const backupsDir = path.join(process.cwd(), 'backups');
-    
+
     if (!fs.existsSync(backupsDir)) {
-      return res.json({
-        success: true,
-        backups: []
-      });
+      return res.json(
+);
     }
 
     const files = fs.readdirSync(backupsDir);
     const backups = files.map(filename => {
       const filePath = path.join(backupsDir, filename);
       const stats = fs.statSync(filePath);
-      
+
       let type = 'unknown';
       if (filename.includes('full_backup')) type = 'full';
       else if (filename.includes('data_backup')) type = 'data_only';
-      
+
       return {
         filename,
         size_bytes: stats.size,
@@ -399,7 +397,7 @@ router.get('/backup/list', (req: Request, res: Response) => {
     //   total_size_mb: Math.round(backups.reduce((sum, backup) => sum + backup.size_mb, 0) * 100) / 100
     // });
 
-      res.json(
+    res.json(
       backups,
     );
   } catch (error: any) {
@@ -412,10 +410,16 @@ router.get('/backup/list', (req: Request, res: Response) => {
   }
 });
 // Endpoint para eliminar respaldo
-router.delete('/backup/:filename', (req: Request, res: Response) => {
+router.delete('/backup/:filename',async(req: Request, res: Response) => {
   try {
     const { filename } = req.params;
     const backupPath = path.join(process.cwd(), 'backups', filename);
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nombre de archivo inválido'
+      });
+    }
 
     if (!fs.existsSync(backupPath)) {
       return res.status(404).json({
@@ -424,7 +428,7 @@ router.delete('/backup/:filename', (req: Request, res: Response) => {
       });
     }
 
-    fs.unlinkSync(backupPath);
+    await fs.promises.unlink(backupPath);
 
     res.json({
       success: true,
@@ -433,10 +437,16 @@ router.delete('/backup/:filename', (req: Request, res: Response) => {
     });
 
   } catch (error: any) {
-    console.error('Error deleting backup:', error);
+      console.error('Error deleting backup:', error);
+    
+    let mensaje = 'Error al eliminar respaldo';
+    if (error.code === 'EPERM') {
+      mensaje = 'Permiso denegado. El archivo puede estar en uso o necesitas ejecutar como administrador.';
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Error al eliminar respaldo',
+      message: mensaje,
       error: error.message
     });
   }
