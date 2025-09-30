@@ -20,7 +20,7 @@ services:
       - db
   db:
     image: mongo:latest
-    container_name: mi-mongo
+    container_name: mi-mongo001
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
